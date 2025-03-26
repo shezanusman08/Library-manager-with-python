@@ -1,6 +1,6 @@
 # Library Management System 📚
 
-Welcome to the **Library Management System**, a Streamlit-based web application designed to help you manage your personal library efficiently. This application allows you to add, remove, list, and display books, as well as view library statistics. Whether you're an avid reader or just starting to build your collection, this tool is here to make your life easier.
+Welcome to the **Library Management System**, a Cli-based web application designed to help you manage your personal library efficiently. This application allows you to add, remove, list, and display books, as well as view library statistics. Whether you're an avid reader or just starting to build your collection, this tool is here to make your life easier.
 
 ---
 
@@ -39,7 +39,6 @@ Welcome to the **Library Management System**, a Streamlit-based web application 
 
 
    ## **Technologies Used 💻**
-    - Streamlit: A powerful framework for building data-driven web applications in Python.
 
     - JSON: Used for storing and managing library data in a simple, human-readable format.
 

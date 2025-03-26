@@ -1,10 +1,12 @@
-import streamlit as st
 import json
 import os
 
 data_file = "library.txt"
 
-# Load library data
+
+#  --------functions
+
+# load data from file
 def load_library():
     if os.path.exists(data_file):
         try:
@@ -14,78 +16,120 @@ def load_library():
             return []
     return []
 
-# Save library data
+
+# save data to file
 def save_library(library):
     with open(data_file, "w") as file:
         json.dump(library, file, indent=4)
 
-# Initialize session state
-if "library" not in st.session_state:
-    st.session_state.library = load_library()
 
-# Streamlit UI
-st.title("📚 Library Management System")
+# add book
+def add_book(library):
+    title = input("Enter title: ")
+    author = input("Enter author: ")
+    year = input("Enter year: ")
+    genre = input("Enter genre: ")
+    read = input("Have you read this book? (yes/no): ").strip().lower() == "yes"
 
-menu = st.sidebar.radio("Menu", ["Add Book", "Remove Book", "List Books", "Display All Books", "Display Stats"])
+    new_book = {
+        "title": title,
+        "author": author,
+        "year": year,
+        "genre": genre,
+        "read": read
+    }
 
-# Add a book
-if menu == "Add Book":
-    st.header("Add a New Book")
-    title = st.text_input("Enter title:")
-    author = st.text_input("Enter author:")
-    year = st.text_input("Enter year:")
-    genre = st.text_input("Enter genre:")
-    read = st.checkbox("Have you read this book?")
-    
-    if st.button("Add Book"):
-        new_book = {"title": title, "author": author, "year": year, "genre": genre, "read": read}
-        st.session_state.library.append(new_book)
-        save_library(st.session_state.library)
-        st.success(f"Book '{title}' by {author} added to the library!")
+    library.append(new_book)
+    save_library(library)
+    print(f"Book '{title}' by {author} added to the library!")
 
-# Remove a book
-elif menu == "Remove Book":
-    st.header("Remove a Book")
-    titles = [book["title"] for book in st.session_state.library]
-    book_to_remove = st.selectbox("Select book to remove", ["Select"] + titles)
-    
-    if st.button("Remove Book") and book_to_remove != "Select":
-        st.session_state.library = [book for book in st.session_state.library if book["title"] != book_to_remove]
-        save_library(st.session_state.library)
-        st.success(f"Book '{book_to_remove}' removed from the library!")
 
-# List books based on criteria
-elif menu == "List Books":
-    st.header("List Books")
-    search_by = st.selectbox("Search by", ["title", "author", "year", "genre", "read"])
-    search_term = st.text_input(f"Enter the {search_by}:")
-    
-    if st.button("Search"):
-        results = [book for book in st.session_state.library if search_term.lower() in str(book[search_by]).lower()]
-        if results:
-            for book in results:
-                st.write(f"{book['title']} by {book['author']} ({book['year']}) - {book['genre']} - {'Read' if book['read'] else 'Unread'}")
-        else:
-            st.warning("No books found!")
+# remove books
+def remove_book(library):
+    title = input("Enter title of the book to remove: ").strip().lower()
+    new_library = [book for book in library if book["title"].strip().lower() != title]
 
-# Display all books
-elif menu == "Display All Books":
-    st.header("All Books in Library")
-    if st.session_state.library:
-        for book in st.session_state.library:
-            st.write(f"{book['title']} by {book['author']} ({book['year']}) - {book['genre']} - {'Read' if book['read'] else 'Unread'}")
+    if len(new_library) == len(library):
+        print(f"Book '{title}' not found in the library!")
     else:
-        st.warning("No books in the library!")
+        save_library(new_library)
+        print(f"Book '{title}' removed from the library!")
+        return new_library  # Return updated library
+    return library
 
-# Display library statistics
-elif menu == "Display Stats":
-    st.header("Library Statistics")
-    total_books = len(st.session_state.library)
-    total_read = sum(book["read"] for book in st.session_state.library)
+
+# list books
+def list_books(library):
+    search_by = input("Search by title, author, year, genre, or read: ").strip().lower()
+
+    if search_by not in ["title", "author", "year", "genre", "read"]:
+        print("Invalid search criteria!")
+        return
+
+    search_term = input(f"Enter the {search_by}: ").strip().lower()
+
+    results = [book for book in library if search_term in str(book[search_by]).strip().lower()]
+
+    if results:
+        for book in results:
+            print(f"{book['title']} by {book['author']} ({book['year']}) - {book['genre']} - {'read' if book['read'] else 'unread'}")
+    else:
+        print("No books found!")
+
+
+# display all books
+def display_books(library):
+    if library:
+        for book in library:
+            print(f"{book['title']} by {book['author']} ({book['year']}) - {book['genre']} - {'read' if book['read'] else 'unread'}")
+    else:
+        print("No books in the library!")
+
+
+# display stats
+def display_stats(library):
+    total_books = len(library)
+    total_read = sum(book["read"] for book in library)
     total_unread = total_books - total_read
     percentage_read = (total_read / total_books) * 100 if total_books else 0
-    
-    st.write(f"Total books: {total_books}")
-    st.write(f"Total read: {total_read}")
-    st.write(f"Total unread: {total_unread}")
-    st.write(f"Percentage read: {percentage_read:.2f}%")
+
+    print(f"Total books: {total_books}")
+    print(f"Total read: {total_read}")
+    print(f"Total unread: {total_unread}")
+    print(f"Percentage read: {percentage_read:.2f}%")
+
+
+#  --------main
+def main():
+    library = load_library()
+
+    while True:
+        print("\nWelcome to the Library!")
+        print("1. Add book")
+        print("2. Remove book")
+        print("3. List books")
+        print("4. Display all books")
+        print("5. Display stats")
+        print("6. Exit")
+
+        choice = input("Enter choice: ").strip()
+
+        if choice == "1":
+            add_book(library)
+        elif choice == "2":
+            library = remove_book(library)  # Update library after removing a book
+        elif choice == "3":
+            list_books(library)
+        elif choice == "4":
+            display_books(library)
+        elif choice == "5":
+            display_stats(library)
+        elif choice == "6":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice! Please enter a number between 1 and 6.")
+
+
+if __name__ == "__main__":
+    main()
